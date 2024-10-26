@@ -102,6 +102,60 @@ void TfLiteVarArrayFree(T* a) {
   free(a);
 }
 
+namespace {
+
+TfLiteQuantization TfLiteClone(const TfLiteQuantization& src) {
+  TfLiteQuantization dst;
+  dst.type = src.type;
+  switch (src.type) {
+    case kTfLiteNoQuantization:
+      break;
+    case kTfLiteAffineQuantization: {
+      dst.params = malloc(sizeof(TfLiteAffineQuantization));
+      const TfLiteAffineQuantization* const src_params =
+          (TfLiteAffineQuantization*)(src.params);
+      TfLiteAffineQuantization* const dst_params =
+          (TfLiteAffineQuantization*)(dst.params);
+      dst_params->quantized_dimension = src_params->quantized_dimension;
+      dst_params->scale = TfLiteFloatArrayCopy(src_params->scale);
+      dst_params->zero_point = TfLiteIntArrayCopy(src_params->zero_point);
+      break;
+    }
+  }
+  return dst;
+}
+
+TfLiteSparsity TfLiteClone(const TfLiteSparsity& src) {
+  TfLiteSparsity dst = src;
+  dst.traversal_order = TfLiteIntArrayCopy(src.traversal_order);
+  dst.block_map = TfLiteIntArrayCopy(src.block_map);
+  if (src.dim_metadata) {
+    dst.dim_metadata = reinterpret_cast<TfLiteDimensionMetadata*>(
+        malloc(sizeof(TfLiteDimensionMetadata) * src.dim_metadata_size));
+    for (int i = 0; i < src.dim_metadata_size; ++i) {
+      dst.dim_metadata[i] = src.dim_metadata[i];
+      dst.dim_metadata[i].array_segments =
+          TfLiteIntArrayCopy(src.dim_metadata[i].array_segments);
+      dst.dim_metadata[i].array_indices =
+          TfLiteIntArrayCopy(src.dim_metadata[i].array_indices);
+    }
+  }
+  return dst;
+}
+
+// Clones the source sparsity to a newly allocated object.
+TfLiteSparsity* TfLiteClone(const TfLiteSparsity* const src) {
+  if (!src) {
+    return nullptr;
+  }
+  TfLiteSparsity* dst =
+      reinterpret_cast<TfLiteSparsity*>(malloc(sizeof(TfLiteSparsity)));
+  *dst = TfLiteClone(*src);
+  return dst;
+}
+
+}  // namespace
+
 }  // namespace
 
 extern "C" {
@@ -232,6 +286,29 @@ void TfLiteTensorFree(TfLiteTensor* t) {
   TfLiteQuantizationFree(&t->quantization);
   TfLiteSparsityFree(t->sparsity);
   t->sparsity = nullptr;
+}
+
+TfLiteTensor TfLiteTensorClone(const TfLiteTensor src) {
+  TfLiteTensor dst = src;
+  // Data that is owned by the original tensor mut be cloned. Check
+  // TfLiteTensorFree to find out which members are owned.
+  if (src.data.data) {
+    if (src.allocation_type == kTfLiteVariantObject) {
+      dst.data.data =
+          reinterpret_cast<const VariantData*>(src.data.data)->CloneTo(nullptr);
+    } else if (TfLiteTensorGetAllocationStrategy(&src) ==
+               kTfLiteAllocationStrategyMalloc) {
+      dst.data.data = malloc(src.bytes);
+      std::memcpy(dst.data.data, src.data.data, src.bytes);
+    } else {
+      dst.data = src.data;
+    }
+  }
+  dst.dims = TfLiteIntArrayCopy(src.dims);
+  dst.dims_signature = TfLiteIntArrayCopy(src.dims_signature);
+  dst.quantization = TfLiteClone(src.quantization);
+  dst.sparsity = TfLiteClone(src.sparsity);
+  return dst;
 }
 
 void TfLiteTensorReset(TfLiteType type, const char* name, TfLiteIntArray* dims,
@@ -399,7 +476,7 @@ TfLiteAllocationStrategy TfLiteTensorGetAllocationStrategy(
     case kTfLiteDynamic:
       return kTfLiteAllocationStrategyMalloc;
     case kTfLitePersistentRo:
-      return kTfLiteAllocationStrategyUnknown;
+      return kTfLiteAllocationStrategyMalloc;
     case kTfLiteCustom:
       return kTfLiteAllocationStrategyUnknown;
     case kTfLiteVariantObject:
