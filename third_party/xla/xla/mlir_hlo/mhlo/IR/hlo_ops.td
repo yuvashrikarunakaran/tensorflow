@@ -2842,7 +2842,7 @@ def MHLO_ReshapeOp: MHLO_Op<"reshape",
 
   let arguments = (ins MHLO_AnyTensor:$operand);
 
-  let results = (outs MHLO_StaticShapeTensor);
+  let results = (outs MHLO_AnyTensor);
   let hasFolder = 1;
   let hasCanonicalizer = 1;
   let hasVerifier = 1;
