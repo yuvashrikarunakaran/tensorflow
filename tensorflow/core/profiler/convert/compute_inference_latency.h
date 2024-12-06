@@ -12,16 +12,22 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
-#ifndef TENSORFLOW_CORE_PROFILER_CONVERT_MULTI_XSPACE_TO_INFERENCE_STATS_H_
-#define TENSORFLOW_CORE_PROFILER_CONVERT_MULTI_XSPACE_TO_INFERENCE_STATS_H_
 
-#include "absl/strings/string_view.h"
-#include "tensorflow/core/profiler/convert/repository.h"
+#ifndef TENSORFLOW_CORE_PROFILER_CONVERT_COMPUTE_INFERENCE_LATENCY_H_
+#define TENSORFLOW_CORE_PROFILER_CONVERT_COMPUTE_INFERENCE_LATENCY_H_
+
+#include <string>
+#include <vector>
+
 #include "tensorflow/core/profiler/protobuf/inference_stats.pb.h"
-namespace tensorflow::profiler {
-absl::Status ConvertMultiXSpaceToInferenceStats(
-    const SessionSnapshot& session_snapshot, absl::string_view request_column,
-    absl::string_view batch_column, InferenceStats* inference_stats);
-}
+#include "tensorflow/core/profiler/protobuf/overview_page.pb.h"
 
-#endif  // TENSORFLOW_CORE_PROFILER_CONVERT_MULTI_XSPACE_TO_INFERENCE_STATS_H_
+namespace tensorflow::profiler {
+
+// Compute the inference latency from inference stats proto.
+OverviewInferenceLatency ComputeInferenceLatencyResult(
+    const InferenceStats& inference_stats);
+
+}  // namespace tensorflow::profiler
+
+#endif  // TENSORFLOW_CORE_PROFILER_CONVERT_COMPUTE_INFERENCE_LATENCY_H_
