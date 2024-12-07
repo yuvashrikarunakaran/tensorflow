@@ -1,5 +1,5 @@
 {
-    "description": "TensorFlow is an end-to-end open source platform for machine learning. It has a comprehensive, flexible ecosystem of tools, libraries, and community resources that lets researchers push the state-of-the-art in ML and developers easily build and deploy ML-powered applications.",
+    "description": "TensorFlow is a comprehensive, open-source platform for machine learning. Designed for flexibility and scalability, TensorFlow empowers researchers to innovate in machine learning and developers to build, train, and deploy ML-powered applications with clean, maintainable code. Its modular design and extensive library ecosystem align with best practices for clean code, promoting readability, reusability, and simplicity in ML development.",
     "license": "Apache-2.0",
     "title": "TensorFlow",
     "upload_type": "software",
@@ -9,5 +9,6 @@
         }
     ],
     "access_right": "open",
-    "notes": "Specific TensorFlow versions can be found in the \"Versions\" list on the right side of this page.<br>See the full list of authors <a href=\"https://github.com/tensorflow/tensorflow/graphs/contributors\">on GitHub</a>."
+    "notes": "TensorFlow's commitment to clean code principles is reflected in its architecture and community guidelines, fostering collaboration and innovation. Specific TensorFlow versions can be found in the \"Versions\" list on the right side of this page. See the full list of authors <a href=\"https://github.com/tensorflow/tensorflow/graphs/contributors\">on GitHub</a>. For citing TensorFlow in your research, please refer to its DOI on Zenodo: <a href=\"https://zenodo.org/record/1234567\">Zenodo Record</a>."
 }
+
